@@ -22,4 +22,17 @@
 # - поле возраст НЕ является числом от 10 до 99: ValueError
 # Вызов метода обернуть в try-except.
 
-# TODO здесь ваш код
+analized_file = 'registrations.txt'
+good_data = 'registrations_good.log'
+bad_data = 'registrations_bad.log'
+
+with open(analized_file, 'r', encoding='utf-8') as file:
+    for line in file:
+        try:
+            name, email, age = line.split(' ')
+            if 10>int(age) or int(age)>99:
+                print('Неверный возраст', age)
+
+        except ValueError as exc:
+            print(f'Не хватает операндов {exc} в строке {line}')
+
