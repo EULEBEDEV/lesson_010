@@ -21,18 +21,54 @@
 # - поле емейл НЕ содержит @ и .(точку): NotEmailError (кастомное исключение)
 # - поле возраст НЕ является числом от 10 до 99: ValueError
 # Вызов метода обернуть в try-except.
+class NotNameError(Exception):
+    pass
+
+class NotEmailError(Exception):
+    pass
+
 
 analized_file = 'registrations.txt'
 good_data = 'registrations_good.log'
 bad_data = 'registrations_bad.log'
+errors = 0
 
-with open(analized_file, 'r', encoding='utf-8') as file:
+with open(analized_file, 'r', encoding='utf-8') as file, \
+        open(good_data, 'w', encoding='utf-8') as gooddata, open(bad_data, 'w', encoding='utf-8') as baddata:
     for line in file:
         try:
             name, email, age = line.split(' ')
-            if 10>int(age) or int(age)>99:
-                print('Неверный возраст', age)
+            if 10 > int(age) or int(age) > 99:
+                raise ValueError('Не корректный возраст')
+            if not name.isalpha():
+                raise NotNameError('Не корректное имя')
+            if not '@' or not '.' in email:
+                raise NotEmailError
+            gooddata.write(line)
 
         except ValueError as exc:
-            print(f'Не хватает операндов {exc} в строке {line}')
+            if 'unpack' in exc.args[0]:
+                baddata.write(line)
+                errors += 1
+                # print(f"Не хватает операндов {exc}")
+            elif 'int' in exc.args[0]:
+                baddata.write(line)
+                errors += 1
+                # print(f"Возраст не число: {age}")
 
+            else:
+                baddata.write(line)
+                errors += 1
+                # print(f"{exc} в строке {line}")
+
+        except NotNameError as exc:
+            baddata.write(line)
+            errors += 1
+            # print(exc, name)
+
+        except NotEmailError as exc:
+            baddata.write(line)
+            errors += 1
+            # print(f'Не корректная почта {email}')
+
+print(f'Проверка завершена, количество ошибок: {errors}')
